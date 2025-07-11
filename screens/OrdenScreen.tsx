@@ -19,7 +19,7 @@ export default function OrdenScreen() {
       const { data, error } = await supabase
         .from('pedidos')
         .select('*')
-        .order('fecha', { ascending: false }) // opcional: para ver los últimos pedidos primero
+        .order('fecha', { ascending: false }) 
 
       if (error) console.error('Error al traer pedidos', error)
       else setPedidos(data as Pedido[])
