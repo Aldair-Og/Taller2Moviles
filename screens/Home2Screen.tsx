@@ -8,21 +8,40 @@ export default function HomeScreen({ navigation }: any) {
       <Text style={styles.subtitle}>Gestiona tus productos y pedidos</Text>
 
       <View style={styles.cardContainer}>
-        <TouchableOpacity 
-          style={[styles.card, styles.readCard]} 
+        <TouchableOpacity
+          style={[styles.card, styles.readCard]}
           onPress={() => navigation.navigate("Catalogo")}
         >
           <Text style={styles.cardIcon}>📦</Text>
           <Text style={styles.cardTitle}>Ver Productos</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.card, styles.createCard]} 
+        <TouchableOpacity
+          style={[styles.card, styles.createCard]}
           onPress={() => navigation.navigate("AgregarP")}
         >
           <Text style={styles.cardIcon}>➕</Text>
           <Text style={styles.cardTitle}>Agregar Producto</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.card, styles.createCard]}
+          onPress={() => navigation.navigate("Mapa")}
+        >
+          <Text style={styles.cardIcon}>🗺️</Text>
+          <Text style={styles.cardTitle}>Ubicacion del Negocio</Text>
+        </TouchableOpacity>
+
+
+        <TouchableOpacity
+          style={[styles.card, styles.createCard]}
+          onPress={() => navigation.navigate("EditarUbicacion")}
+        >
+          <Text style={styles.cardIcon}>✏️</Text>
+          <Text style={styles.cardTitle}>Editar Ubicación del Negocio</Text>
+        </TouchableOpacity>
+
+
       </View>
     </ScrollView>
   )

@@ -1,37 +1,81 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { signOut, onAuthStateChanged } from 'firebase/auth'
-import { auth, db } from '../firebase/Config'
-import { doc, getDoc } from 'firebase/firestore'
-import { LinearGradient } from 'expo-linear-gradient'
-import * as Animatable from 'react-native-animatable'
-import { Ionicons } from '@expo/vector-icons'
-
+import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '../firebase/Config';
+import { doc, getDoc } from 'firebase/firestore';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Animatable from 'react-native-animatable';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '../supabase/Config';
 const { width } = Dimensions.get('window');
 
 export default function PerfilScreen({ navigation }: any) {
-  const [nombre, setNombre] = useState("")
-  const [edad, setEdad] = useState(0)
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      
+      // Subir inmediatamente después de seleccionar
+      subir(result.assets[0].uri);
+    }
+  };
+
+  async function subir(uri: string) {
+  if (!uri) return;
+
+  const id = Date.now();
+  const fileName = `avatar_${id}.png`;
+
+  const { data, error } = await supabase
+    .storage
+    .from('perfil')
+    .upload(`public/${fileName}`, {
+      cacheControl: '3600',
+      upsert: false,
+      uri: uri
+    } as any, {
+      contentType: 'image/png'
+    });
+
+  if (error) {
+    console.error("Error subiendo imagen:", error);
+    return;
+  }
+
+  console.log("Archivo subido:", fileName, data);
+}
+
+  const [nombre, setNombre] = useState("");
+  const [edad, setEdad] = useState(0);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        leer(user.uid)
+        leer(user.uid);
       }
-    })
-  }, [])
+    });
+  }, []);
 
   function leer(uid: string) {
-    const docRef = doc(db, "usuarios", uid)
+    const docRef = doc(db, "usuarios", uid);
     getDoc(docRef)
       .then((docSnap) => {
         if (docSnap.exists()) {
-          const data = docSnap.data()
-          setNombre(data.nombre)
-          setEdad(data.edad)
+          const data = docSnap.data();
+          setNombre(data.nombre);
+          setEdad(data.edad);
         }
       })
-      .catch((error) => console.error("Error al leer datos:", error))
+      .catch((error) => console.error("Error al leer datos:", error));
   }
 
   function logout() {
@@ -40,9 +84,9 @@ export default function PerfilScreen({ navigation }: any) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Home' }],
-        })
+        });
       })
-      .catch((error) => console.error("Error al cerrar sesión", error))
+      .catch((error) => console.error("Error al cerrar sesión", error));
   }
 
   return (
@@ -51,12 +95,10 @@ export default function PerfilScreen({ navigation }: any) {
       style={styles.container}
       start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
     >
-      <Animatable.Image
-        animation="fadeInDown"
-        duration={1000}
-        source={{ uri: 'https://scontent.fuio35-1.fna.fbcdn.net/v/t39.30808-6/498619487_710673041338907_7993682079893736557_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=IVklalmmbycQ7kNvwG-tEIa&_nc_oc=AdlFs4Qh56J-5mTWivLKCNDRNDqnnTMma8LU9IPSN1kQ3_mqH0RiGaEcVASRopElVC9dZAZbS6HQafbzNHkMGO2l&_nc_zt=23&_nc_ht=scontent.fuio35-1.fna&_nc_gid=j5ZZVY0cLLzm_wcMXtUOcg&oh=00_AfSGvDyb5h75O5-FCNgnqf-Uk4gYWo-CipUZB50nuvuG0Q&oe=68747ADE' }}
-        style={styles.logo}
-      />
+      <View style={styles.uploadContainer}>
+        <Button title="Seleccionar foto de perfil" onPress={pickImage} color={'#0a3d62'} />
+        {image && <Image source={{ uri: image }} style={styles.logo} />}
+      </View>
 
       <Animatable.Text animation="fadeIn" duration={1500} style={styles.titulo}>
         Mi Perfil
@@ -82,25 +124,34 @@ export default function PerfilScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  uploadContainer: {
+    width: '80%',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  btnGuardar: {
+    marginTop: 10,
+    width: '50%',
+  },
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20
+    padding: 20,
   },
   logo: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    marginBottom: 20,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    marginTop: 15,
     borderWidth: 3,
-    borderColor: '#fff'
+    borderColor: '#fff',
   },
   titulo: {
     fontSize: 30,
     color: '#fff',
     fontWeight: '700',
-    marginBottom: 25
+    marginBottom: 25,
   },
   card: {
     backgroundColor: '#fff',
@@ -113,17 +164,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 8,
     elevation: 5,
-    marginBottom: 50
+    marginBottom: 50,
   },
   nombre: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10
+    marginBottom: 10,
   },
   dato: {
     fontSize: 20,
-    color: '#666'
+    color: '#666',
   },
   btnCerrar: {
     flexDirection: 'row',
@@ -135,11 +186,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
-    elevation: 5
+    elevation: 5,
   },
   btnTexto: {
     color: '#fff',
     fontSize: 19,
-    fontWeight: '600'
-  }
-})
+    fontWeight: '600',
+  },
+});
