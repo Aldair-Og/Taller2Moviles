@@ -12,6 +12,8 @@ const { width } = Dimensions.get('window');
 
 export default function PerfilScreen({ navigation }: any) {
   const [image, setImage] = useState<string | null>(null);
+  const [uid, setUid] = useState<string | null>(null);
+
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -21,38 +23,35 @@ export default function PerfilScreen({ navigation }: any) {
       quality: 1,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && uid) {
       setImage(result.assets[0].uri);
-      
-      // Subir inmediatamente después de seleccionar
-      subir(result.assets[0].uri);
+      subir(result.assets[0].uri, uid);
     }
   };
 
-  async function subir(uri: string) {
-  if (!uri) return;
+  async function subir(uri: string, uid: string) {
+    if (!uri) return;
 
-  const id = Date.now();
-  const fileName = `avatar_${id}.png`;
+    const fileName = `avatar_${uid}.png`;
 
-  const { data, error } = await supabase
-    .storage
-    .from('perfil')
-    .upload(`public/${fileName}`, {
-      cacheControl: '3600',
-      upsert: false,
-      uri: uri
-    } as any, {
-      contentType: 'image/png'
-    });
+    const { data, error } = await supabase
+      .storage
+      .from('perfil')
+      .upload(`public/${fileName}`, {
+        cacheControl: '3600',
+        upsert: true,
+        uri: uri
+      } as any, {
+        contentType: 'image/png'
+      });
 
-  if (error) {
-    console.error("Error subiendo imagen:", error);
-    return;
+    if (error) {
+      console.error("Error subiendo imagen:", error);
+      return;
+    }
+
+    console.log("Archivo subido:", fileName, data);
   }
-
-  console.log("Archivo subido:", fileName, data);
-}
 
   const [nombre, setNombre] = useState("");
   const [edad, setEdad] = useState(0);
@@ -60,6 +59,7 @@ export default function PerfilScreen({ navigation }: any) {
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        setUid(user.uid);
         leer(user.uid);
       }
     });

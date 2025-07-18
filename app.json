@@ -1,12 +1,11 @@
 {
   "expo": {
     "name": "Food Fast",
-    "slug": "Food Fast",
+    "slug": "Food-Fast",
     "version": "1.0.0",
-    "orientation": "contain",
+    "orientation": "portrait",
     "icon": "./assets/images/logo1.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/logo1.png",
       "resizeMode": "contain",
@@ -20,10 +19,23 @@
         "foregroundImage": "./assets/images/logo1.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.aldarog.FoodFast"
     },
     "web": {
       "favicon": "./assets/images/logo1.png"
+    },
+    "owner": "aldar-og",
+    "extra": {
+      "eas": {
+        "projectId": "256e3e02-e18c-4258-848f-1391e7960d6b"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/256e3e02-e18c-4258-848f-1391e7960d6b"
     }
   }
 }
